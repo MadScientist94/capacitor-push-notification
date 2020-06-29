@@ -1,0 +1,180 @@
+initially we setting up environments for push-service and angular fire store
+
+here we used a service module to provide pushnotification service service 
+
+head 1 basic requirements to link with firebase console
+
+step 1
+ a create a fire base project in firebase console
+ b get the google-service.json on creating project or in project setting
+
+ step 2 
+ a initialize capacitor if project is already created using command
+    ensure @capacitor/cli has been installed
+
+        npx cap init "CapApp" "com.mydomain.myappname "
+
+        in the bove cli we used app name and app package id of our firebase project else it will raise an error
+example                ? App name: CapApp
+                       ? App Package ID: com.mydomain.myappname
+
+
+step 3 
+procide following commands to generate the platforms
+    ionic build
+npx cap add ios
+npx cap add android
+step 4
+
+for android : after initialization we add the downloaded google-service.json in android/app  
+for ios :
+
+
+head 2 setting capacitor push 
+ensure that @capacitor/core is in node module
+
+head 3 firebase moduleas initiation
+ ng add @angular/fire  for fire store collection funtionalities
+ mpm install firebase  for ensure comunication and configuring app with fire base
+
+
+
+
+
+
+implement the dependensies in project
+
+step 1 configuring firebase in app.module.ts
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPQDHK7cTMF5uILOeyqWPzpYp1QUiw9mE",
+  databaseURL: "https://arco-4ba16.firebaseio.com",
+  projectId: "arco-4ba16",
+  storageBucket: "arco-4ba16.appspot.com",
+  messagingSenderId: "528386108857",
+  appId: "1:528386108857:android:9ccebd3dbc41970e23da68",
+};
+
+edit the above mentioned data as per the google-service.json
+
+step 2  imports and declaration of requred dependencies in app module
+
+import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { Firebase } from '@ionic-native/firebase/ngx';
+
+@NgModule({
+  bootstrap: [AppComponent],
+
+  declarations: [],
+    entryComponents: [],
+      imports: [ AngularFireModule.initializeApp(firebaseConfig),
+                 AngularFirestoreModule ],
+  
+  providers: [Firebase],
+
+
+step 3 imports and declaration of requred dependencies in pushnotification.service
+
+
+import { Injectable } from '@angular/core';
+import { Platform, ToastController } from '@ionic/angular';
+import { AngularFirestore} from '@angular/fire/firestore';
+import { Plugins,
+         PushNotification,  
+         PushNotificationToken,
+         PushNotificationActionPerformed } from "@capacitor/core";
+import { Router } from '@angular/router';
+const { PushNotifications } = Plugins;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PushNotificationService {
+
+  constructor(private afs: AngularFirestore,
+              private platform: Platform,
+              private _mainservice: MainService,
+              private ButtonToast: ToastController,
+              private router: Router,
+              ) { }
+
+              
+              
+              async getToken() {
+              PushNotifications.register()
+                .then(() => { })
+                .catch((err) => alert(JSON.stringify(err)));
+              
+              
+      PushNotifications.addListener('registration',
+      (token: PushNotificationToken) => {
+        this.saveToken(token.value)
+        alert('line 103')
+        // alert('Push registration success, token: ' + token.value);
+      }
+    );
+  
+    PushNotifications.addListener('registrationError',
+      (error: any) => {
+        alert('Error on registration: ' + JSON.stringify(error));
+      }
+    );
+  
+    PushNotifications.addListener('pushNotificationReceived',
+      (notification: PushNotification) => {
+      //  alert('Push received: ' + JSON.stringify(notification));
+      this.presentToastWithOptions(notification)
+      
+      }
+    );
+  
+    PushNotifications.addListener('pushNotificationActionPerformed',
+      (notification: PushNotificationActionPerformed) => {
+        // alert('Push action performed: ' + JSON.stringify(notification));
+        this.presentToastWithOptions(notification.notification)
+      }
+    );
+  }
+  
+
+    
+
+     saveToken(token) {
+      if (!token) { return; }
+     const devicesRef = this.afs.collection('devices');
+      const data = {
+        token:token,
+        userId: Math.ceil(Math.random()*1000)
+      };
+      this.afs.collection<any>('devices').doc<any>('userList1').set(data);
+    
+
+    }
+
+pushData:PushNotification;
+async presentToastWithOptions(msg:PushNotification) {
+  const toast = await this.ButtonToast.create({
+    header: msg.title,
+    message: msg.body ,
+    position: 'top',
+    // closeButtonText: 'Done'
+    buttons: [
+      {
+        text: 'open',
+        handler:()=>{
+          this.pushData=msg;
+this.router.navigate(['/push-notification'])
+        }
+      }
+      ,
+      {
+      text: 'Done',
+      handler: () => {
+        toast.dismiss();
+      }
+    }]
+  });
+  toast.present();
+}
+  }
