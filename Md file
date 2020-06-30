@@ -1,14 +1,14 @@
-initially we setting up environments for push-service and angular fire store
+#initially we setting up environments for push-service and angular fire store
 
 here we used a service module to provide pushnotification service service 
 
-head 1 basic requirements to link with firebase console
+## basic requirements to link with firebase console
 
-step 1
+###step 1
  a create a fire base project in firebase console
  b get the google-service.json on creating project or in project setting
 
- step 2 
+### step 2 
  a initialize capacitor if project is already created using command
     ensure @capacitor/cli has been installed
 
@@ -19,21 +19,21 @@ example                ? App name: CapApp
                        ? App Package ID: com.mydomain.myappname
 
 
-step 3 
+###step 3 
 procide following commands to generate the platforms
     ionic build
 npx cap add ios
 npx cap add android
-step 4
+###step 4
 
 for android : after initialization we add the downloaded google-service.json in android/app  
 for ios :
 
 
-head 2 setting capacitor push 
+## setting capacitor push 
 ensure that @capacitor/core is in node module
 
-head 3 firebase moduleas initiation
+## firebase moduleas initiation
  ng add @angular/fire  for fire store collection funtionalities
  mpm install firebase  for ensure comunication and configuring app with fire base
 
@@ -42,9 +42,9 @@ head 3 firebase moduleas initiation
 
 
 
-implement the dependensies in project
+###implement the dependensies in project
 
-step 1 configuring firebase in app.module.ts
+###step 1 configuring firebase in app.module.ts
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPQDHK7cTMF5uILOeyqWPzpYp1QUiw9mE",
@@ -57,7 +57,7 @@ const firebaseConfig = {
 
 edit the above mentioned data as per the google-service.json
 
-step 2  imports and declaration of requred dependencies in app module
+###step 2  imports and declaration of requred dependencies in app module
 
 import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
@@ -74,9 +74,9 @@ import { Firebase } from '@ionic-native/firebase/ngx';
   providers: [Firebase],
 
 
-step 3 imports and declaration of requred dependencies in pushnotification.service
+###step 3 imports and declaration of requred dependencies in pushnotification.service
 
-
+<Script>
 import { Injectable } from '@angular/core';
 import { Platform, ToastController } from '@ionic/angular';
 import { AngularFirestore} from '@angular/fire/firestore';
@@ -178,3 +178,4 @@ this.router.navigate(['/push-notification'])
   toast.present();
 }
   }
+</Script>
